@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react"; // spinner icon
 import "./Demo.css";
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 const Demo = () => {
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
@@ -36,7 +36,7 @@ const Demo = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch(`${API_BASE}/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -60,7 +60,7 @@ const Demo = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/inputform", {
+      const res = await fetch(`${API_BASE}/api/inputform`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -74,7 +74,7 @@ const Demo = () => {
       console.log("Result:", data);
 
       setResult(data);
-      
+
       // Extract the result images from the response
       if (data.success && data.results) {
         setResultImages({
@@ -84,7 +84,7 @@ const Demo = () => {
           tableImage: data.results.tableImage || data.results.table1
         });
       }
-      
+
       setStep(3);
     } catch (error) {
       console.error("Processing failed:", error);
@@ -241,46 +241,46 @@ const Demo = () => {
                       <strong>Details:</strong> {result.details || "No details"}
                     </p>
                   </div>
-                  
+
                   {/* Display Result Images */}
                   <div className="result-images">
                     <div className="image-grid">
                       <div className="image-item">
                         <h4>Original Image</h4>
                         {resultImages.originalImage && (
-                          <img 
-                            src={`data:image/jpeg;base64,${resultImages.originalImage}`} 
-                            alt="Original" 
+                          <img
+                            src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+                            alt="Original"
                           />
                         )}
                       </div>
-                      
+
                       <div className="image-item">
                         <h4>XAI Heatmap</h4>
                         {resultImages.heatmapImage && (
-                          <img 
-                            src={`data:image/jpeg;base64,${resultImages.heatmapImage}`} 
-                            alt="Heatmap" 
+                          <img
+                            src={`data:image/jpeg;base64,${resultImages.heatmapImage}`}
+                            alt="Heatmap"
                           />
                         )}
                       </div>
-                      
+
                       <div className="image-item">
                         <h4>Segmentation Mask</h4>
                         {resultImages.maskImage && (
-                          <img 
-                            src={`data:image/jpeg;base64,${resultImages.maskImage}`} 
-                            alt="Mask" 
+                          <img
+                            src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+                            alt="Mask"
                           />
                         )}
                       </div>
-                      
+
                       <div className="image-item">
                         <h4>Cell Descriptors</h4>
                         {resultImages.tableImage && (
-                          <img 
-                            src={`data:image/jpeg;base64,${resultImages.tableImage}`} 
-                            alt="Table" 
+                          <img
+                            src={`data:image/jpeg;base64,${resultImages.tableImage}`}
+                            alt="Table"
                           />
                         )}
                       </div>
