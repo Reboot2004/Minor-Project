@@ -1,0 +1,192 @@
+/* General styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Light & Dark Mode Styles */
+.light-mode {
+    background: #ffffff; /* Changed to white */
+    color: #000000; /* Changed to black */
+}
+
+.dark-mode {
+    background: #121212;
+    color: white;
+}
+
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 1000;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    /* subtle translucent surface so underlying site color remains visible */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    box-shadow: 0px 6px 18px rgba(2,6,23,0.06);
+    transition: background 0.3s, color 0.3s, transform 0.3s;
+    color: var(--text-primary);
+}
+
+/* Navbar on Scroll - keep subtle */
+.navbar.scrolled {
+    background: rgba(0, 0, 0, 0.10);
+    transform: translateX(-50%) scale(0.99);
+}
+
+/* When the nav element itself has class 'dark-mode' (Navbar.jsx adds it) */
+.navbar.dark-mode {
+    background: rgba(10,10,10,0.65);
+    color: var(--text-primary);
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.45);
+}
+
+/* Navbar Brand */
+.navbar-brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Menu */
+.menu {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: 'Inter', sans-serif; /* improved font */
+    transition: color 0.3s ease-in-out;
+}
+
+.menu a:hover {
+    color: #6b5bff; /* match hero highlight */
+}
+
+.menu .nav-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.menu .nav-link:hover {
+    color: #6b5bff;
+}
+
+/* Try Now (compact) in navbar */
+.nav-try {
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-right: 0.5rem;
+}
+.nav-try.btn-primary {
+    /* reduce shadow so it fits navbar */
+    box-shadow: 0 6px 18px rgba(107, 91, 255, 0.10);
+}
+.nav-try.btn-primary:hover {
+    box-shadow: 0 12px 30px rgba(107, 91, 255, 0.14);
+}
+
+/* Right Section */
+.right-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Dark Mode Toggle */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-primary);
+    transition: color 0.3s ease-in-out;
+}
+
+.theme-toggle:hover {
+    color: #6b5bff; /* match hero highlight */
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    cursor: pointer;
+    font-size: 25px;
+}
+
+/* Mobile Menu */
+@media (max-width: 768px) {
+    .menu {
+        display: none;
+    }
+
+    .menu.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .menu.active li {
+        padding: 12px 0;
+    }
+
+    .menu.active a {
+        color: white;
+        font-size: 18px;
+        transition: color 0.3s ease-in-out;
+    }
+
+    .menu.active a:hover {
+        color: #6b5bff; /* match hero highlight */
+    }
+
+    .hamburger {
+        display: block;
+    }
+}
+
+/* Mobile Menu Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

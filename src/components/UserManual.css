@@ -1,0 +1,160 @@
+.user-manual {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  padding: 3rem 2rem;
+  background-color: var(--background-color); /* adapts to theme */
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  min-height: 60vh;
+}
+
+/* grid container: left = media column, right = details column */
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem 2rem;
+  align-items: start;
+}
+
+/* Title placed in the right column above the first step */
+.manual-title {
+  font-size: clamp(1.8rem, 2.8vw, 3rem);
+  font-weight: 800;
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  grid-column: 2 / 3;
+  padding-top: 0;
+  position: static; /* not fixed/sticky anymore */
+}
+
+/* media cell (left column) */
+.manual-media {
+  display: block;
+  width: 100%;
+  grid-column: 1 / 2;
+}
+
+/* details cell (right column) */
+.manual-details {
+  grid-column: 2 / 3;
+  background: var(--card-background);
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.06);
+}
+
+/* Video and label */
+.demo-video {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.12);
+}
+
+/* overlay label */
+.demo-label {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* details text */
+.manual-details h3 {
+  margin: 0 0 0.6rem 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.manual-details p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Ensure each pair (video + details) occupies its own row in the grid */
+.manual-grid > .manual-media,
+.manual-grid > .manual-details {
+  /* rows will auto-flow, so keep default behavior */
+}
+
+/* Dark mode friendly overrides */
+html.dark-mode .manual-details {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* Responsive: stack columns on small screens, title above everything */
+@media (max-width: 900px) {
+  .manual-grid {
+    grid-template-columns: 1fr;
+  }
+  .manual-title {
+    grid-column: 1 / 2;
+    margin-bottom: 1rem;
+    position: static;
+  }
+  .manual-media,
+  .manual-details {
+    grid-column: 1 / 2;
+  }
+  .manual-details {
+    margin-top: 0.6rem;
+  }
+}
+
+.manual-row {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--card-background);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.06);
+  transition: transform 0.18s ease, background 0.2s ease;
+}
+
+/* reverse the order for even rows */
+.manual-row.reverse {
+  flex-direction: row-reverse;
+}
+
+/* media and details share equal space */
+.manual-media,
+.manual-details {
+  flex: 1;
+}
+
+/* details */
+.manual-details h3 {
+  margin: 0 0 0.6rem 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+/* Dark mode friendly overrides */
+html.dark-mode .manual-row {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Responsive: stack columns on small screens */
+@media (max-width: 900px) {
+  .user-manual {
+    flex-direction: column;
+  }
+  .user-manual-left,
+  .user-manual-right {
+    flex: unset;
+    height: auto;
+  }
+  .manual-row,
+  .manual-row.reverse {
+    flex-direction: column;
+  }
+  .manual-row {
+    padding: 1rem;
+  }
+}

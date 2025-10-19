@@ -1,0 +1,108 @@
+.project-section {
+  /* use global site variable so dark-mode toggle works */
+  background: var(--background-color);
+  padding: 80px 20px;
+  color: var(--text-primary);
+}
+
+.project-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.project-heading {
+  font-size: 2rem;
+  font-weight: 700; /* ensure bold */
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.project-description {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 850px;
+  margin: 0 auto 60px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+.project-card {
+  /* cards follow site card background so toggle works */
+  background: var(--card-background);
+  border-radius: 18px;
+  padding: 30px 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  color: #fff;
+}
+
+.icon-circle.blue {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.icon-circle.purple {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.icon-circle.green {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700; /* make bold for consistency */
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.card-text {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.card-list {
+  list-style: none;
+  padding-left: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.card-list li {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.card-highlight {
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: rgba(241, 245, 249, 0.6);
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: inline-block;
+}

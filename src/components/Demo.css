@@ -1,0 +1,230 @@
+.demo {
+  padding: 3rem 2rem;
+  background: var(--background-color);
+  font-family: "Inter", sans-serif;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+/* Progress bar */
+.progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  flex-wrap: nowrap;
+}
+
+/* circle step */
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  gap: 6px;
+  min-width: 56px;
+}
+
+.progress-step .step-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  color: #374151;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.progress-step .step-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* connector bar between steps */
+.progress-connector {
+  width: 72px;
+  height: 6px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+/* active styles */
+.progress-step.active .step-number {
+  background: linear-gradient(90deg, #6b5bff, #00cfff);
+  color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(107, 91, 255, 0.12);
+}
+.progress-connector.active {
+  background: linear-gradient(90deg, #6b5bff, #00cfff);
+  width: 88px;
+}
+
+/* hover */
+.progress-step:hover .step-number {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(107, 91, 255, 0.08);
+}
+
+/* Step card */
+.demo-step {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--card-background);
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+/* existing styles kept and adapted */
+.demo-step h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+input[type="file"] {
+  display: block;
+  margin: 0 auto;
+}
+
+.loading {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Preview */
+.preview {
+  margin-top: 1.5rem;
+}
+
+.preview img {
+  width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.next-btn {
+  background: linear-gradient(90deg, #6b5bff, #00cfff);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.12s ease;
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+}
+
+.next-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Dropdown */
+.dropdown {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 1rem;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.results {
+  text-align: left;
+  background: var(--card-background);
+  padding: 1rem;
+  border-radius: 8px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Result images section */
+.result-images {
+  margin: 1.5rem 0;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.image-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.image-item h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.image-item img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+  object-fit: contain;
+  max-height: 200px;
+}
+
+/* Make the results section responsive */
+@media (max-width: 768px) {
+  .image-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .progress-connector {
+    width: 48px;
+    height: 5px;
+  }
+  .progress-step .step-number {
+    width: 40px;
+    height: 40px;
+  }
+  .progress {
+    gap: 8px;
+  }
+}

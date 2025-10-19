@@ -1,0 +1,41 @@
+/* added font import for a cleaner navbar & UI */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+:root {
+  --primary-color: #FAFAFA;
+  --secondary-color: #f0f0f0;
+  --accent-color: #6b5bff; /* changed from #64ffda to site purple */
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --background-color: #FAFAFA; /* Light mode site background */
+  --card-background: #f8f8f8;
+  --transition: all 0.3s ease;
+}
+
+/* Dark mode site background as requested */
+html.dark-mode {
+  --primary-color: #0A0A0A;
+  --secondary-color: #121212;
+  --accent-color: #6b5bff; /* dark-mode accent matches site purple */
+  --text-primary: #e6f1ff;
+  --text-secondary: #8892b0;
+  --background-color: #0A0A0A; /* Dark mode site background */
+  --card-background: #121212;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
