@@ -11,12 +11,6 @@ const Demo = () => {
   const [xaiMethod, setXaiMethod] = useState("");
   const [magval, setMagval] = useState("");
   const [result, setResult] = useState(null);
-  const [resultImages, setResultImages] = useState({
-    originalImage: null,
-    heatmapImage: null,
-    maskImage: null,
-    tableImage: null
-  });
   const [viewMode, setViewMode] = useState("summary"); // "summary" or "detailed"
 
   // Handle file selection
@@ -59,7 +53,6 @@ const Demo = () => {
   const handleGenerate = async () => {
     if (!model || !xaiMethod || !magval) return;
     setLoading(true);
-
     try {
       const res = await fetch(`${API_BASE}/api/inputform`, {
         method: "POST",
@@ -70,32 +63,9 @@ const Demo = () => {
           magval: magval,
         }),
       });
-
       const data = await res.json();
       console.log("Result:", data);
-      if (data) {
-        console.log("data keys:", Object.keys(data));
-      }
-
       setResult(data);
-
-      // Extract images from top-level data
-      if (data.success) {
-        setResultImages({
-          originalImage: data.image1 || null,
-          heatmapImage: data.inter1 || null,
-          maskImage: data.mask1 || null,
-          tableImage: data.table1 || null
-        });
-      } else {
-        setResultImages({
-          originalImage: null,
-          heatmapImage: null,
-          maskImage: null,
-          tableImage: null
-        });
-      }
-
       setStep(3);
     } catch (error) {
       console.error("Processing failed:", error);
@@ -108,9 +78,9 @@ const Demo = () => {
     setStep(num);
   };
 
-  // Render images in Summary View (similar to Segmentation.js renderImages)
+  // Render images in Summary View
   const renderSummaryView = () => {
-    if (!resultImages.originalImage) return null;
+    if (!result || !result.image1 || !result.mask1) return null;
 
     return (
       <div className="summary-view">
@@ -118,7 +88,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Original Image</h4>
             <img
-              src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+              src={`data:image/jpeg;base64,${result.image1}`}
               alt="Original"
               style={{ width: "100%", height: "auto" }}
             />
@@ -126,7 +96,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Segmentation Mask</h4>
             <img
-              src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+              src={`data:image/jpeg;base64,${result.mask1}`}
               alt="Mask"
               style={{ width: "100%", height: "auto" }}
             />
@@ -136,9 +106,9 @@ const Demo = () => {
     );
   };
 
-  // Render images in Detailed View (similar to Segmentation.js renderDetailedView)
+  // Render images in Detailed View
   const renderDetailedView = () => {
-    if (!resultImages.originalImage) return null;
+    if (!result || !result.image1) return null;
 
     return (
       <div className="detailed-view">
@@ -163,28 +133,28 @@ const Demo = () => {
             <tr>
               <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
                 <img
-                  src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+                  src={`data:image/jpeg;base64,${result.image1}`}
                   alt="Original"
                   style={{ width: "80%", height: "auto" }}
                 />
               </td>
               <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
                 <img
-                  src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+                  src={`data:image/jpeg;base64,${result.mask1}`}
                   alt="Mask"
                   style={{ width: "80%", height: "auto" }}
                 />
               </td>
               <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
                 <img
-                  src={`data:image/jpeg;base64,${resultImages.heatmapImage}`}
+                  src={`data:image/jpeg;base64,${result.inter1}`}
                   alt="Heatmap"
                   style={{ width: "80%", height: "auto" }}
                 />
               </td>
               <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
                 <img
-                  src={`data:image/jpeg;base64,${resultImages.tableImage}`}
+                  src={`data:image/jpeg;base64,${result.table1}`}
                   alt="Table"
                   style={{ width: "80%", height: "auto" }}
                 />
