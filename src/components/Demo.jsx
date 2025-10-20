@@ -107,7 +107,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Original Image</h4>
             <img
-              src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+              src={`data:image/png;base64,${data.image1}`}
               alt="Original"
               style={{ width: "100%", height: "auto" }}
             />
@@ -115,7 +115,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Segmentation Mask</h4>
             <img
-              src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+              src={`data:image/png;base64,${resultImages.maskImage}`}
               alt="Mask"
               style={{ width: "100%", height: "auto" }}
             />
