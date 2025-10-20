@@ -71,20 +71,13 @@ const Demo = () => {
       });
 
       const data = await res.json();
-      console.log("Result:", data);
-
-      setResult(data);
-      console.log(data.results)
-      Object.entries(data).forEach(([key, value]) => {
-  console.log(`${key}: ${value}`);
-});
       // Extract the result images from the response
       if (data.success && data.results) {
         setResultImages({
-          originalImage: data.results.originalImage || data.results.image1,
-          heatmapImage: data.results.heatmapImage || data.results.inter1,
-          maskImage: data.results.maskImage || data.results.mask1,
-          tableImage: data.results.tableImage || data.results.table1
+          originalImage: data.results.originalImage || data.image1,
+          heatmapImage: data.results.heatmapImage || data.inter1,
+          maskImage: data.results.maskImage || data.mask1,
+          tableImage: data.results.tableImage || data.table1
         });
       }
 
