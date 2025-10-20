@@ -74,7 +74,8 @@ const Demo = () => {
       console.log("Result:", data);
 
       setResult(data);
-
+      console.log(data.results)
+      console.log(json.stringify(data));
       // Extract the result images from the response
       if (data.success && data.results) {
         setResultImages({
