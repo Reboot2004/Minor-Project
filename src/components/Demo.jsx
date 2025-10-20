@@ -75,9 +75,9 @@ const Demo = () => {
       console.log("Result:", data);
 
       setResult(data);
-
+      
       // Extract the result images from the response
-      if (data.success && data.results) {
+      if (data.success && data) {
         setResultImages({
           originalImage: data.results.originalImage || data.image1,
           heatmapImage: data.results.heatmapImage || data.inter1,
