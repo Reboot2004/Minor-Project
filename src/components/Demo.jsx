@@ -17,6 +17,7 @@ const Demo = () => {
     maskImage: null,
     tableImage: null
   });
+  const [viewMode, setViewMode] = useState("summary"); // "summary" or "detailed"
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -71,6 +72,10 @@ const Demo = () => {
       });
 
       const data = await res.json();
+      console.log("Result:", data);
+
+      setResult(data);
+
       // Extract the result images from the response
       if (data.success && data.results) {
         setResultImages({
@@ -78,14 +83,6 @@ const Demo = () => {
           heatmapImage: data.results.heatmapImage || data.inter1,
           maskImage: data.results.maskImage || data.mask1,
           tableImage: data.results.tableImage || data.table1
-        });
-      }
-
-      // optionally set textual result if present
-      if (data.results && (data.results.summary || data.results.details)) {
-        setResult({
-          summary: data.results.summary,
-          details: data.results.details
         });
       }
 
@@ -101,6 +98,115 @@ const Demo = () => {
     setStep(num);
   };
 
+  // Render images in Summary View (similar to Segmentation.js renderImages)
+  const renderSummaryView = () => {
+    if (!resultImages.originalImage) return null;
+
+    return (
+      <div className="summary-view">
+        <div className="image-pair">
+          <div className="pair-item">
+            <h4>Original Image</h4>
+            <img
+              src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+              alt="Original"
+              style={{ width: "100%", height: "auto" }}
+            />
+          </div>
+          <div className="pair-item">
+            <h4>Segmentation Mask</h4>
+            <img
+              src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+              alt="Mask"
+              style={{ width: "100%", height: "auto" }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render images in Detailed View (similar to Segmentation.js renderDetailedView)
+  const renderDetailedView = () => {
+    if (!resultImages.originalImage) return null;
+
+    return (
+      <div className="detailed-view">
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
+                Original Image
+              </th>
+              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
+                Segmentation Mask
+              </th>
+              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
+                XAI Heatmap
+              </th>
+              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
+                Cell Descriptor
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
+                <img
+                  src={`data:image/jpeg;base64,${resultImages.originalImage}`}
+                  alt="Original"
+                  style={{ width: "80%", height: "auto" }}
+                />
+              </td>
+              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
+                <img
+                  src={`data:image/jpeg;base64,${resultImages.maskImage}`}
+                  alt="Mask"
+                  style={{ width: "80%", height: "auto" }}
+                />
+              </td>
+              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
+                <img
+                  src={`data:image/jpeg;base64,${resultImages.heatmapImage}`}
+                  alt="Heatmap"
+                  style={{ width: "80%", height: "auto" }}
+                />
+              </td>
+              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
+                <img
+                  src={`data:image/jpeg;base64,${resultImages.tableImage}`}
+                  alt="Table"
+                  style={{ width: "80%", height: "auto" }}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  // Download results functionality
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/zip`, {
+        method: "GET",
+      });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "output.zip");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
   // When user selects model, auto-assign XAI method
   const handleModelChange = (value) => {
     setModel(value);
@@ -112,134 +218,6 @@ const Demo = () => {
       setXaiMethod("");
     }
   };
-
-  // Helper to get trailing number from a key like "image1" or "mask2"
-  const getLastNumber = (str) => {
-    const m = String(str).match(/(\d+)$/);
-    return m ? m[1] : "";
-  };
-
-  // Render images using the provided display logic (adapted to current state keys)
-  const renderImages = () => {
-    const images = [];
-    let colImages = [];
-    let count = 1;
-
-    // We'll treat resultImages as the source (renamed from imageSrc).
-    // If keys are not numbered (like originalImage), we also support them.
-    const imageSrc = resultImages || {};
-
-    for (let key in imageSrc) {
-      if (!Object.prototype.hasOwnProperty.call(imageSrc, key)) continue;
-      // Determine if this key should be treated as an "image"
-      // Accept keys that include "image" (case-insensitive) or start with "image"
-      if (images.length >= 5) break; // same limit as original snippet
-
-      const lowered = key.toLowerCase();
-      if (lowered.includes("image") || lowered === "originalimage" || lowered === "heatmapimage" || lowered === "tableimage") {
-        const num = getLastNumber(key) || count; // fallback to count if no trailing number
-        // try to find corresponding mask key (mask{num}) or a general maskImage
-        const maskKeyByNum = `mask${num}`;
-        const mask = imageSrc[maskKeyByNum] || imageSrc.maskImage || imageSrc.mask || null;
-        const image = imageSrc[key];
-
-        // Only render pairs when image exists
-        if (!image) {
-          count += 1;
-          continue;
-        }
-
-        // Build the column item (two side-by-side sections: image + mask)
-        const colItem = (
-          <div key={key} className="demo-image-col" style={{ flex: 1, padding: 8, minWidth: 0 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div>
-                <h4 style={{ margin: "0 0 6px 0" }}>{`Image ${count}`}</h4>
-                <img
-                  src={`data:image/png;base64,${image}`}
-                  alt={`image-${key}`}
-                  style={{ width: "100%", maxWidth: "100%", height: "auto", borderRadius: 6 }}
-                />
-              </div>
-              <div>
-                <h4 style={{ margin: "6px 0 6px 0" }}>{`Segmentation Mask ${count}`}</h4>
-                {mask ? (
-                  <img
-                    src={`data:image/png;base64,${mask}`}
-                    alt={`mask-${key}`}
-                    style={{ width: "100%", maxWidth: "100%", height: "auto", borderRadius: 6 }}
-                  />
-                ) : (
-                  <div style={{ color: "var(--text-secondary)" }}>No mask available</div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-
-        colImages.push(colItem);
-
-        // When we have two columns, push them as a "row"
-        if (colImages.length === 2) {
-          images.push(
-            <div key={`row-${images.length}`} className="demo-image-row" style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-              {colImages}
-            </div>
-          );
-          colImages = [];
-        }
-
-        count += 1;
-      } else {
-        // ignore non-image keys
-      }
-    }
-
-    // Push remaining column if any
-    if (colImages.length > 0) {
-      images.push(
-        <div key={`row-${images.length}`} className="demo-image-row" style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-          {colImages}
-        </div>
-      );
-      colImages = [];
-    }
-
-    // If nothing was generated from numbered keys above, fall back to showing available image-like fields individually
-    if (images.length === 0) {
-      const fallbackCols = [];
-      let fallbackCount = 1;
-      for (let key of ["originalImage", "heatmapImage", "maskImage", "tableImage"]) {
-        const img = imageSrc[key];
-        if (!img) continue;
-        fallbackCols.push(
-          <div key={`fb-${key}`} style={{ flex: 1, padding: 8 }}>
-            <h4 style={{ margin: "0 0 6px 0" }}>{key === "originalImage" ? `Image ${fallbackCount}` : key}</h4>
-            <img src={`data:image/png;base64,${img}`} alt={key} style={{ width: "100%", borderRadius: 6 }} />
-          </div>
-        );
-        fallbackCount += 1;
-        if (fallbackCols.length === 2) {
-          images.push(
-            <div key={`fb-row-${images.length}`} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-              {fallbackCols.splice(0, 2)}
-            </div>
-          );
-        }
-      }
-      if (fallbackCols.length > 0) {
-        images.push(
-          <div key={`fb-row-${images.length}`} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            {fallbackCols}
-          </div>
-        );
-      }
-    }
-
-    return images;
-  };
-
-  const hasImages = Object.values(resultImages).some(Boolean);
 
   return (
     <>
@@ -363,47 +341,81 @@ const Demo = () => {
                 <Loader2 className="spinner" size={28} /> Generating results...
               </div>
             ) : (
-              <>
-                <div className="results">
-                  <p>
-                    <strong>Summary:</strong> {result?.summary || "No summary"}
-                  </p>
-                  <p>
-                    <strong>Details:</strong> {result?.details || "No details"}
-                  </p>
-                </div>
+              result && (
+                <>
+                  {/* View Mode Toggle */}
+                  <div className="view-toggle" style={{ marginBottom: "20px", textAlign: "center" }}>
+                    <button
+                      className={`toggle-btn ${viewMode === "summary" ? "active" : ""}`}
+                      onClick={() => setViewMode("summary")}
+                      style={{
+                        padding: "8px 20px",
+                        marginRight: "10px",
+                        border: "1px solid #007bff",
+                        background: viewMode === "summary" ? "#007bff" : "white",
+                        color: viewMode === "summary" ? "white" : "#007bff",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Summary View
+                    </button>
+                    <button
+                      className={`toggle-btn ${viewMode === "detailed" ? "active" : ""}`}
+                      onClick={() => setViewMode("detailed")}
+                      style={{
+                        padding: "8px 20px",
+                        border: "1px solid #007bff",
+                        background: viewMode === "detailed" ? "#007bff" : "white",
+                        color: viewMode === "detailed" ? "white" : "#007bff",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Detailed View
+                    </button>
 
-                {/* Display Result Images using adapted renderImages logic */}
-                {hasImages ? (
-                  <div className="result-images">
-                    {renderImages()}
+                    {/* Download Button */}
+                    <button
+                      onClick={handleDownload}
+                      className="download-btn"
+                      style={{
+                        padding: "8px 20px",
+                        marginLeft: "20px",
+                        border: "1px solid #28a745",
+                        background: "#28a745",
+                        color: "white",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Download Results
+                    </button>
                   </div>
-                ) : (
-                  <p style={{ color: "var(--text-secondary)" }}>No result images available.</p>
-                )}
 
-                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => setStep(2)}
-                    className="next-btn"
-                    style={{ background: "#e5e7eb", color: "#111827" }}
-                  >
-                    ← Back to Model
-                  </button>
-                  <button
-                    onClick={() => {
-                      setStep(1);
-                      // reset state if desired:
-                      // setResult(null);
-                      // setResultImages({ originalImage: null, heatmapImage: null, maskImage: null, tableImage: null });
-                    }}
-                    className="next-btn"
-                    style={{ marginLeft: 8 }}
-                  >
-                    Start Over
-                  </button>
-                </div>
-              </>
+                  {/* Display Result Images based on view mode */}
+                  <div className="result-images">
+                    {viewMode === "summary" ? renderSummaryView() : renderDetailedView()}
+                  </div>
+
+                  <div style={{ marginTop: "20px", display: "flex", gap: 8, justifyContent: "center" }}>
+                    <button
+                      onClick={() => setStep(2)}
+                      className="next-btn"
+                      style={{ background: "#e5e7eb", color: "#111827" }}
+                    >
+                      ← Back to Model
+                    </button>
+                    <button
+                      onClick={() => setStep(1)}
+                      className="next-btn"
+                      style={{ marginLeft: 8 }}
+                    >
+                      Start Over
+                    </button>
+                  </div>
+                </>
+              )
             )}
           </div>
         )}
