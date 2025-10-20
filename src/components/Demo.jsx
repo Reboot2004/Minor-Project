@@ -99,7 +99,8 @@ const Demo = () => {
 
   // Render images in Summary View (similar to Segmentation.js renderImages)
   const renderSummaryView = () => {
-    if (!resultImages.originalImage) return null;
+    console.log(resultImages)
+    if (!data.image1) return null;
 
     return (
       <div className="summary-view">
