@@ -81,6 +81,14 @@ const Demo = () => {
         });
       }
 
+      // optionally set textual result if present
+      if (data.results && (data.results.summary || data.results.details)) {
+        setResult({
+          summary: data.results.summary,
+          details: data.results.details
+        });
+      }
+
       setStep(3);
     } catch (error) {
       console.error("Processing failed:", error);
@@ -104,6 +112,134 @@ const Demo = () => {
       setXaiMethod("");
     }
   };
+
+  // Helper to get trailing number from a key like "image1" or "mask2"
+  const getLastNumber = (str) => {
+    const m = String(str).match(/(\d+)$/);
+    return m ? m[1] : "";
+  };
+
+  // Render images using the provided display logic (adapted to current state keys)
+  const renderImages = () => {
+    const images = [];
+    let colImages = [];
+    let count = 1;
+
+    // We'll treat resultImages as the source (renamed from imageSrc).
+    // If keys are not numbered (like originalImage), we also support them.
+    const imageSrc = resultImages || {};
+
+    for (let key in imageSrc) {
+      if (!Object.prototype.hasOwnProperty.call(imageSrc, key)) continue;
+      // Determine if this key should be treated as an "image"
+      // Accept keys that include "image" (case-insensitive) or start with "image"
+      if (images.length >= 5) break; // same limit as original snippet
+
+      const lowered = key.toLowerCase();
+      if (lowered.includes("image") || lowered === "originalimage" || lowered === "heatmapimage" || lowered === "tableimage") {
+        const num = getLastNumber(key) || count; // fallback to count if no trailing number
+        // try to find corresponding mask key (mask{num}) or a general maskImage
+        const maskKeyByNum = `mask${num}`;
+        const mask = imageSrc[maskKeyByNum] || imageSrc.maskImage || imageSrc.mask || null;
+        const image = imageSrc[key];
+
+        // Only render pairs when image exists
+        if (!image) {
+          count += 1;
+          continue;
+        }
+
+        // Build the column item (two side-by-side sections: image + mask)
+        const colItem = (
+          <div key={key} className="demo-image-col" style={{ flex: 1, padding: 8, minWidth: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div>
+                <h4 style={{ margin: "0 0 6px 0" }}>{`Image ${count}`}</h4>
+                <img
+                  src={`data:image/png;base64,${image}`}
+                  alt={`image-${key}`}
+                  style={{ width: "100%", maxWidth: "100%", height: "auto", borderRadius: 6 }}
+                />
+              </div>
+              <div>
+                <h4 style={{ margin: "6px 0 6px 0" }}>{`Segmentation Mask ${count}`}</h4>
+                {mask ? (
+                  <img
+                    src={`data:image/png;base64,${mask}`}
+                    alt={`mask-${key}`}
+                    style={{ width: "100%", maxWidth: "100%", height: "auto", borderRadius: 6 }}
+                  />
+                ) : (
+                  <div style={{ color: "var(--text-secondary)" }}>No mask available</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+        colImages.push(colItem);
+
+        // When we have two columns, push them as a "row"
+        if (colImages.length === 2) {
+          images.push(
+            <div key={`row-${images.length}`} className="demo-image-row" style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+              {colImages}
+            </div>
+          );
+          colImages = [];
+        }
+
+        count += 1;
+      } else {
+        // ignore non-image keys
+      }
+    }
+
+    // Push remaining column if any
+    if (colImages.length > 0) {
+      images.push(
+        <div key={`row-${images.length}`} className="demo-image-row" style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          {colImages}
+        </div>
+      );
+      colImages = [];
+    }
+
+    // If nothing was generated from numbered keys above, fall back to showing available image-like fields individually
+    if (images.length === 0) {
+      const fallbackCols = [];
+      let fallbackCount = 1;
+      for (let key of ["originalImage", "heatmapImage", "maskImage", "tableImage"]) {
+        const img = imageSrc[key];
+        if (!img) continue;
+        fallbackCols.push(
+          <div key={`fb-${key}`} style={{ flex: 1, padding: 8 }}>
+            <h4 style={{ margin: "0 0 6px 0" }}>{key === "originalImage" ? `Image ${fallbackCount}` : key}</h4>
+            <img src={`data:image/png;base64,${img}`} alt={key} style={{ width: "100%", borderRadius: 6 }} />
+          </div>
+        );
+        fallbackCount += 1;
+        if (fallbackCols.length === 2) {
+          images.push(
+            <div key={`fb-row-${images.length}`} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+              {fallbackCols.splice(0, 2)}
+            </div>
+          );
+        }
+      }
+      if (fallbackCols.length > 0) {
+        images.push(
+          <div key={`fb-row-${images.length}`} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            {fallbackCols}
+          </div>
+        );
+      }
+    }
+
+    return images;
+  };
+
+  const hasImages = Object.values(resultImages).some(Boolean);
 
   return (
     <>
@@ -227,80 +363,47 @@ const Demo = () => {
                 <Loader2 className="spinner" size={28} /> Generating results...
               </div>
             ) : (
-              result && (
-                <>
-                  <div className="results">
-                    <p>
-                      <strong>Summary:</strong> {result.summary || "No summary"}
-                    </p>
-                    <p>
-                      <strong>Details:</strong> {result.details || "No details"}
-                    </p>
-                  </div>
+              <>
+                <div className="results">
+                  <p>
+                    <strong>Summary:</strong> {result?.summary || "No summary"}
+                  </p>
+                  <p>
+                    <strong>Details:</strong> {result?.details || "No details"}
+                  </p>
+                </div>
 
-                  {/* Display Result Images */}
+                {/* Display Result Images using adapted renderImages logic */}
+                {hasImages ? (
                   <div className="result-images">
-                    <div className="image-grid">
-                      <div className="image-item">
-                        <h4>Original Image</h4>
-                        {resultImages.originalImage && (
-                          <img
-                            src={`data:image/jpeg;base64,${resultImages.originalImage}`}
-                            alt="Original"
-                          />
-                        )}
-                      </div>
-
-                      <div className="image-item">
-                        <h4>XAI Heatmap</h4>
-                        {resultImages.heatmapImage && (
-                          <img
-                            src={`data:image/jpeg;base64,${resultImages.heatmapImage}`}
-                            alt="Heatmap"
-                          />
-                        )}
-                      </div>
-
-                      <div className="image-item">
-                        <h4>Segmentation Mask</h4>
-                        {resultImages.maskImage && (
-                          <img
-                            src={`data:image/jpeg;base64,${resultImages.maskImage}`}
-                            alt="Mask"
-                          />
-                        )}
-                      </div>
-
-                      <div className="image-item">
-                        <h4>Cell Descriptors</h4>
-                        {resultImages.tableImage && (
-                          <img
-                            src={`data:image/jpeg;base64,${resultImages.tableImage}`}
-                            alt="Table"
-                          />
-                        )}
-                      </div>
-                    </div>
+                    {renderImages()}
                   </div>
+                ) : (
+                  <p style={{ color: "var(--text-secondary)" }}>No result images available.</p>
+                )}
 
-                  <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-                    <button
-                      onClick={() => setStep(2)}
-                      className="next-btn"
-                      style={{ background: "#e5e7eb", color: "#111827" }}
-                    >
-                      ← Back to Model
-                    </button>
-                    <button
-                      onClick={() => setStep(1)}
-                      className="next-btn"
-                      style={{ marginLeft: 8 }}
-                    >
-                      Start Over
-                    </button>
-                  </div>
-                </>
-              )
+                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => setStep(2)}
+                    className="next-btn"
+                    style={{ background: "#e5e7eb", color: "#111827" }}
+                  >
+                    ← Back to Model
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStep(1);
+                      // reset state if desired:
+                      // setResult(null);
+                      // setResultImages({ originalImage: null, heatmapImage: null, maskImage: null, tableImage: null });
+                    }}
+                    className="next-btn"
+                    style={{ marginLeft: 8 }}
+                  >
+                    Start Over
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
