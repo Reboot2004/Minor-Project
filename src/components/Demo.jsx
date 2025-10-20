@@ -75,7 +75,9 @@ const Demo = () => {
 
       setResult(data);
       console.log(data.results)
-      console.log(json.stringify(data));
+      Object.entries(data).forEach(([key, value]) => {
+  console.log(`${key}: ${value}`);
+});
       // Extract the result images from the response
       if (data.success && data.results) {
         setResultImages({
