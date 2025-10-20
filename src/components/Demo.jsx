@@ -73,9 +73,9 @@ const Demo = () => {
 
       const data = await res.json();
       console.log("Result:", data);
-
+      console.log(JSON.stringify(data, null, 2));
       setResult(data);
-      
+      for
       // Extract the result images from the response
       if (data.success && data) {
         setResultImages({
