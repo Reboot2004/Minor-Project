@@ -73,15 +73,26 @@ const Demo = () => {
 
       const data = await res.json();
       console.log("Result:", data);
-      console.log(JSON.stringify(data, null, 2));
+      if (data) {
+        console.log("data keys:", Object.keys(data));
+      }
+
       setResult(data);
-      // Extract the result images from the response
-      if (data.success && data) {
+
+      // Extract images from top-level data
+      if (data.success) {
         setResultImages({
-          originalImage: data.results.originalImage || data.image1,
-          heatmapImage: data.results.heatmapImage || data.inter1,
-          maskImage: data.results.maskImage || data.mask1,
-          tableImage: data.results.tableImage || data.table1
+          originalImage: data.image1 || null,
+          heatmapImage: data.inter1 || null,
+          maskImage: data.mask1 || null,
+          tableImage: data.table1 || null
+        });
+      } else {
+        setResultImages({
+          originalImage: null,
+          heatmapImage: null,
+          maskImage: null,
+          tableImage: null
         });
       }
 
@@ -99,8 +110,7 @@ const Demo = () => {
 
   // Render images in Summary View (similar to Segmentation.js renderImages)
   const renderSummaryView = () => {
-    console.log(resultImages)
-    if (!data.image1) return null;
+    if (!resultImages.originalImage) return null;
 
     return (
       <div className="summary-view">
@@ -108,7 +118,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Original Image</h4>
             <img
-              src={`data:image/png;base64,${data.image1}`}
+              src={`data:image/jpeg;base64,${resultImages.originalImage}`}
               alt="Original"
               style={{ width: "100%", height: "auto" }}
             />
@@ -116,7 +126,7 @@ const Demo = () => {
           <div className="pair-item">
             <h4>Segmentation Mask</h4>
             <img
-              src={`data:image/png;base64,${resultImages.maskImage}`}
+              src={`data:image/jpeg;base64,${resultImages.maskImage}`}
               alt="Mask"
               style={{ width: "100%", height: "auto" }}
             />
