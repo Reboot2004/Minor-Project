@@ -65,6 +65,7 @@
   transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(107, 91, 255, 0.12);
 }
+
 .progress-connector.active {
   background: linear-gradient(90deg, #6b5bff, #00cfff);
   width: 88px;
@@ -207,10 +208,123 @@ input[type="file"] {
   max-height: 200px;
 }
 
+/* Summary View Styles */
+.summary-view {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.image-pair {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pair-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pair-item h4 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pair-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Detailed View Styles */
+.detailed-view {
+  width: 100%;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.detailed-view table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-background);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.detailed-view th {
+  background: linear-gradient(90deg, #6b5bff, #00cfff);
+  color: white;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.detailed-view td {
+  padding: 15px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detailed-view td img {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* View Toggle Buttons */
+.view-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toggle-btn {
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.download-btn {
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
 /* Make the results section responsive */
 @media (max-width: 768px) {
   .image-grid {
     grid-template-columns: 1fr;
+  }
+
+  .image-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .detailed-view {
+    font-size: 0.85rem;
+  }
+
+  .detailed-view th {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .view-toggle {
+    flex-direction: column;
   }
 }
 
@@ -220,10 +334,12 @@ input[type="file"] {
     width: 48px;
     height: 5px;
   }
+
   .progress-step .step-number {
     width: 40px;
     height: 40px;
   }
+
   .progress {
     gap: 8px;
   }
