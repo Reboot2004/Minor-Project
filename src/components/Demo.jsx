@@ -3,6 +3,33 @@ import { Loader2, Upload, CheckCircle, AlertCircle, Download, ChevronRight, Chev
 import "./Demo.css";
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 
+// localStorage keys for persistence
+const LS_KEYS = {
+  fileMeta: "demo_file_meta",
+  fileDataURL: "demo_file_dataurl",
+  model: "demo_model",
+  magval: "demo_magval",
+};
+
+// helpers to read/write file previews
+const readFileAsDataURL = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const dataURLToFile = async (dataUrl, filename, type) => {
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], filename || "file", { type: type || blob.type });
+  } catch {
+    return null;
+  }
+};
+
 const Demo = () => {
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
@@ -32,12 +59,40 @@ const Demo = () => {
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
 
+  // persist file (meta + preview) and set state
+  const persistAndSetFile = async (selected) => {
+    setFile(selected);
+    // save meta
+    try {
+      localStorage.setItem(
+        LS_KEYS.fileMeta,
+        JSON.stringify({ name: selected.name, size: selected.size, type: selected.type })
+      );
+    } catch {
+      // ignore quota/meta errors
+    }
+    // save preview for images
+    if (selected.type?.startsWith("image/")) {
+      try {
+        const dataUrl = await readFileAsDataURL(selected);
+        setPreview(dataUrl);
+        localStorage.setItem(LS_KEYS.fileDataURL, dataUrl);
+      } catch {
+        // fallback to non-persistent preview
+        setPreview(URL.createObjectURL(selected));
+        localStorage.removeItem(LS_KEYS.fileDataURL);
+      }
+    } else {
+      setPreview(null);
+      localStorage.removeItem(LS_KEYS.fileDataURL);
+    }
+  };
+
   // Handle file selection
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selected = e.target.files[0];
     if (selected) {
-      setFile(selected);
-      setPreview(URL.createObjectURL(selected));
+      await persistAndSetFile(selected);
       setError(null);
     }
   };
@@ -53,15 +108,13 @@ const Demo = () => {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const selected = e.dataTransfer.files[0];
-      setFile(selected);
-      setPreview(URL.createObjectURL(selected));
+      await persistAndSetFile(selected);
       setError(null);
     }
   };
@@ -146,6 +199,42 @@ const Demo = () => {
     if (canGoTo(num)) setStep(num);
   };
 
+  // rehydrate on mount
+  useEffect(() => {
+    // restore model and magval
+    const savedModel = localStorage.getItem(LS_KEYS.model);
+    if (savedModel) handleModelChange(savedModel);
+    const savedMag = localStorage.getItem(LS_KEYS.magval);
+    if (savedMag !== null) setMagval(savedMag);
+
+    // restore file (if an image was saved)
+    const metaStr = localStorage.getItem(LS_KEYS.fileMeta);
+    const dataUrl = localStorage.getItem(LS_KEYS.fileDataURL);
+    if (metaStr && dataUrl) {
+      try {
+        const meta = JSON.parse(metaStr);
+        (async () => {
+          const reconstructed = await dataURLToFile(dataUrl, meta.name, meta.type);
+          if (reconstructed) setFile(reconstructed);
+          setPreview(dataUrl);
+        })();
+      } catch {
+        // ignore malformed storage
+      }
+    }
+  }, []);
+
+  // keep model/magval in localStorage
+  useEffect(() => {
+    if (model) localStorage.setItem(LS_KEYS.model, model);
+    else localStorage.removeItem(LS_KEYS.model);
+  }, [model]);
+
+  useEffect(() => {
+    if (magval !== "") localStorage.setItem(LS_KEYS.magval, magval);
+    else localStorage.removeItem(LS_KEYS.magval);
+  }, [magval]);
+
   const resetAll = () => {
     setFile(null);
     setPreview(null);
@@ -158,6 +247,11 @@ const Demo = () => {
     setStepStatus({ 1: null, 2: null, 3: null });
     setViewMode("summary");
     setStep(1);
+    // clear persisted state
+    localStorage.removeItem(LS_KEYS.fileMeta);
+    localStorage.removeItem(LS_KEYS.fileDataURL);
+    localStorage.removeItem(LS_KEYS.model);
+    localStorage.removeItem(LS_KEYS.magval);
   };
 
   // Image modal controls
