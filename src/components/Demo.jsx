@@ -572,7 +572,7 @@ const Demo = () => {
                 </select>
               </div>
 
-              {xaiMethod && (
+              {/* {xaiMethod && (
                 <div className="info-box">
                   <Brain size={20} />
                   <div>
@@ -580,7 +580,7 @@ const Demo = () => {
                     <strong>{xaiMethod}</strong>
                   </div>
                 </div>
-              )}
+              )} */}
 
               <div className="form-group">
                 <label htmlFor="mag-input">Magnification Value</label>

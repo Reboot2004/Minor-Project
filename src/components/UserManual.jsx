@@ -7,21 +7,21 @@ const steps = [
     title: "Upload Cell Images",
     description:
       "Begin by uploading your cytology image files. You can upload individual images in JPG, PNG, or JPEG format, or a compressed ZIP file containing multiple cell images for batch analysis.",
-    media: "/assets/Upload.gif",
+    media: "/assets/Upload.mp4",
   },
   {
     id: 2,
     title: "Select Model & Parameters",
     description:
       "From the dropdown menu, choose your preferred segmentation model — options include VGG, XceptionNet, and other hybrid architectures. Enter the desired magnification value to tailor analysis precision, then click on the Generate button to start processing.",
-    media: "/assets/Model.gif",
+    media: "/assets/Model.mp4",
   },
   {
     id: 3,
     title: "View Detailed Results",
     description:
       "Once processing is complete, explore a comprehensive results dashboard. You can view the original cytology image, corresponding segmentation mask, attention heatmap, and a detailed table of extracted cell descriptors for further analysis.",
-    media: "/assets/Results.gif",
+    media: "/assets/Results.mp4",
   },
 ];
 
@@ -34,12 +34,22 @@ const UserManual = () => {
         {steps.map((step) => (
           <React.Fragment key={step.id}>
             <div className="manual-media">
-              <img
+              {/*
+                Replaced <img> with <video> to properly display mp4 assets.
+                No controls are shown; video autoplays, loops, and is muted.
+              */}
+              <video
                 className="demo-gif"
-                src={step.media}
-                alt={`Step ${step.id} - ${step.title}`}
-                loading="lazy" /* added lazy loading */
-              />
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls={false}
+                aria-label={`Step ${step.id} - ${step.title}`}
+              >
+                <source src={step.media} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
 
             <div className="manual-details">
