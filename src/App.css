@@ -1,8 +1,13 @@
+/* reset Vite template constraints */
 #root {
-  max-width: 1280px;
+  max-width: none; /* override template defaults */
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  text-align: initial; /* don't center all text globally */
+  /* make the app use full width, no artificial max-width/padding */
+  min-width: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .logo {
@@ -39,4 +44,11 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* add safe top padding so content isn’t covered by the fixed navbar */
+.app {
+  padding-top: calc(var(--navbar-height) + 12px);
+  width: min(var(--site-max-width), calc(100% - var(--page-gutter))); /* was 32px */
+  margin: 0 auto;
 }

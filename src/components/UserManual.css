@@ -1,12 +1,15 @@
 .user-manual {
   display: flex;
   flex-direction: row;
-  height: 100vh;
+  /* height: 100vh; */ /* removed: allow content to define height */
+  height: auto;
   padding: 3rem 2rem;
-  background-color: var(--background-color); /* adapts to theme */
+  background-color: var(--background-color);
   color: var(--text-primary);
   font-family: "Inter", sans-serif;
   min-height: 60vh;
+  width: min(var(--site-max-width), calc(100% - 32px));
+  margin: 0 auto; /* center within page */
 }
 
 /* grid container: left = media column, right = details column */
@@ -33,6 +36,16 @@
   display: block;
   width: 100%;
   grid-column: 1 / 2;
+}
+
+/* make GIFs responsive */
+.demo-gif {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.12);
 }
 
 /* details cell (right column) */
@@ -90,10 +103,11 @@ html.dark-mode .manual-details {
 @media (max-width: 900px) {
   .manual-grid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
   .manual-title {
     grid-column: 1 / 2;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     position: static;
   }
   .manual-media,
@@ -101,7 +115,7 @@ html.dark-mode .manual-details {
     grid-column: 1 / 2;
   }
   .manual-details {
-    margin-top: 0.6rem;
+    margin-top: 0.4rem;
   }
 }
 

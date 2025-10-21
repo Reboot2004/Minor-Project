@@ -3,6 +3,8 @@
   padding: 2rem 1rem;
   background: var(--background-color);
   color: var(--text-primary);
+  width: min(var(--site-max-width), calc(100% - 32px));
+  margin: 0 auto; /* center within page */
 }
 
 .about-title {

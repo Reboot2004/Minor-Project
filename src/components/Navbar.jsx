@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
+import { FaBars, FaTimes, FaMoon, FaSun, FaGithub } from 'react-icons/fa';
 import { ThemeContext } from '../App';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
@@ -17,12 +17,23 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Scroll-to helpers
   const scrollToId = (id) => {
     const el = document.getElementById(id);
     if (el) {
       // small offset to account for fixed navbar height
       const y = el.getBoundingClientRect().top + window.scrollY - 72;
       window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
+  const goHome = () => {
+    setNav(false);
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 150);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -45,8 +56,8 @@ const Navbar = () => {
         className="navbar-brand"
         role="button"
         tabIndex={0}
-        onClick={() => { setNav(false); navigate('/'); }}
-        onKeyPress={(e) => { if (e.key === 'Enter') { setNav(false); navigate('/'); } }}
+        onClick={goHome}
+        onKeyPress={(e) => { if (e.key === 'Enter') goHome(); }}
         style={{ cursor: 'pointer' }}
       >
         CytoVision AI
@@ -55,7 +66,7 @@ const Navbar = () => {
       <ul className={`menu ${nav ? 'active' : ''}`}>
         {/* HOME -> route to root (/) */}
         <li>
-          <RouterLink to="/" onClick={() => setNav(false)}>Home</RouterLink>
+          <RouterLink to="/" onClick={goHome}>Home</RouterLink>
         </li>
 
         {/* In-page scroll links */}
@@ -75,13 +86,35 @@ const Navbar = () => {
       </ul>
 
       <div className="right-section">
-        <RouterLink to="/demo" className="btn nav-try btn-primary" onClick={() => setNav(false)}>
+        <RouterLink to="/demo" className="btn nav-try" onClick={() => setNav(false)}>
           Try Now
         </RouterLink>
 
-        <button className="theme-toggle" onClick={toggleTheme}>
-          {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
-        </button>
+        {/* theme toggle group */}
+        <div className="theme-toggle-group" role="group" aria-label="Theme toggle">
+          <FaSun className="theme-sun" size={16} aria-hidden />
+          <button
+            type="button"
+            className={`theme-switch ${darkMode ? 'active' : ''}`}
+            onClick={toggleTheme}
+            aria-pressed={darkMode}
+            aria-label="Toggle dark mode"
+          >
+            <span className="knob" />
+          </button>
+          <FaMoon className="theme-moon" size={16} aria-hidden />
+        </div>
+
+        {/* GitHub link */}
+        <a
+          href="https://github.com/Reboot2004/Minor-Project"
+          target="_blank"
+          rel="noreferrer"
+          className="nav-github"
+          aria-label="Open GitHub repository"
+        >
+          <FaGithub size={18} />
+        </a>
 
         <div className="hamburger" onClick={() => setNav(!nav)}>
           {nav ? <FaTimes /> : <FaBars />}
@@ -91,7 +124,7 @@ const Navbar = () => {
       {nav && (
         <ul className="mobile-menu">
           <li>
-            <RouterLink to="/" onClick={() => setNav(false)}>Home</RouterLink>
+            <RouterLink to="/" onClick={goHome}>Home</RouterLink>
           </li>
           <li>
             <button type="button" className="nav-link" onClick={() => goAndScroll('project')}>Project</button>

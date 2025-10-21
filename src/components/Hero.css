@@ -1,10 +1,10 @@
 .hero {
   position: relative;
-  min-height: 100vh; /* cover full viewport */
+  min-height: calc(100svh - var(--navbar-height)); /* account for fixed navbar */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 5%;
+  /* padding: rem 5%;  */
   transition: background 0.4s ease, color 0.4s ease;
   background: transparent; /* match site background */
 }
@@ -40,11 +40,31 @@
   margin-bottom: 0.8rem;
 }
 
+/* Large title like reference */
+.hero-title.hero-title-large {
+  font-size: clamp(2.8rem, 8vw, 5.2rem);
+  line-height: 1;
+  font-weight: 800;
+  margin: 0.25rem 0 1.2rem 0; /* was 0.9rem: more space below title */
+}
+
 /* Accent highlight - restored to previous purple/blue gradient */
 .highlight {
   background: linear-gradient(90deg, #6b5bff, #00cfff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Gradient "100x" */
+.hero-brand {
+  background: linear-gradient(90deg, #6b5bff, #00cfff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Solid part "Projects." */
+.hero-word {
+  color: var(--text-primary);
 }
 
 /* Subtitle */
@@ -53,6 +73,17 @@
   margin-bottom: 1.6rem;
   opacity: 0.95;
   color: var(--text-secondary);
+  text-align: center; /* ensure centered like the reference */
+  max-width: none;   /* JS will clamp width */
+  margin: 0.6rem auto 1.8rem; /* top/bottom spacing under control */
+}
+
+/* Theme-aware subtitle color */
+.hero.light .hero-subtitle {
+  color: #404551; /* requested light theme color */
+}
+.hero.dark .hero-subtitle {
+  color: var(--text-secondary); /* respects dark theme variable */
 }
 
 /* Buttons */
@@ -90,6 +121,31 @@
   opacity: 0.98;
 }
 
+/* Override primary button only inside Hero for requested contrast behavior */
+.hero.light .btn-primary {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.hero.light .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+  opacity: 1;
+}
+
+.hero.dark .btn-primary {
+  background: #fff !important;
+  color: #000 !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(255,255,255,0.12);
+}
+.hero.dark .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(255,255,255,0.22);
+  opacity: 1;
+}
+
 /* Secondary button */
 .btn-secondary {
   background: transparent;
@@ -110,10 +166,28 @@
   background: rgba(255,255,255,0.10);
 }
 
+/* eyebrow line above title */
+.hero-eyebrow {
+  margin: 0 0 0.5rem 0;
+  font-size: clamp(2rem, 1.8vw, 1.3rem);
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+}
+
+/* Large title like reference */
+.hero-title.hero-title-large {
+  font-size: clamp(2.8rem, 8vw, 5.2rem);
+  line-height: 1;
+  font-weight: 800;
+  margin: 0.25rem 0 1.2rem 0; /* was 0.9rem: more space below title */
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .hero {
-    padding: 3rem 2rem;
+    padding: 2rem 2rem; /* was 3rem 2rem — tighter on small screens */
+    min-height: calc(100svh - var(--navbar-height));
   }
   .hero .hero-content {
     padding: 1.2rem 0;
@@ -122,4 +196,20 @@
     padding: 0.7rem 1rem;
     font-size: 0.95rem;
   }
+}
+
+/* xs/sm */
+@media (max-width: 479px) {
+  .hero .hero-content { padding: 1.1rem 0; }
+  .hero-buttons .btn { padding: 0.7rem 1.1rem; font-size: 0.95rem; }
+}
+
+/* md */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero .hero-content { padding: 1.6rem 0; }
+}
+
+/* xl+ widen readable content a bit */
+@media (min-width: 1280px) {
+  .hero .hero-content { max-width: 900px; }
 }

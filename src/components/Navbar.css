@@ -19,17 +19,19 @@ body {
 /* Navbar Styles */
 .navbar {
     position: fixed;
-    top: 0;
-    left: 50%;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    left: 0;                 /* changed: center with left/right + margin auto */
+    right: 0;                /* changed */
+    margin: 0 auto;          /* changed */
     z-index: 1000;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1100px;
+    /* removed translateX(-50%) centering */
+    transform: none;         /* changed: base transform cleared */
+    /* width constrained but fully fluid with small gutters */
+    width: min(var(--site-max-width), calc(100% - var(--page-gutter))); /* use shared gutter */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 25px;
-    /* subtle translucent surface so underlying site color remains visible */
+    padding: 12px 18px; /* slightly tighter for small screens */
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(8px);
     border-radius: 15px;
@@ -38,17 +40,18 @@ body {
     color: var(--text-primary);
 }
 
-/* Navbar on Scroll - keep subtle */
+/* Navbar on Scroll - theme aware */
 .navbar.scrolled {
-    background: rgba(0, 0, 0, 0.10);
-    transform: translateX(-50%) scale(0.99);
+    background: rgba(255, 255, 255, 0.82);
+    transform: scale(0.99); /* changed: no translateX so it stays centered */
 }
-
-/* When the nav element itself has class 'dark-mode' (Navbar.jsx adds it) */
 .navbar.dark-mode {
     background: rgba(10,10,10,0.65);
     color: var(--text-primary);
     box-shadow: 0px 6px 18px rgba(0,0,0,0.45);
+}
+.navbar.dark-mode.scrolled {
+    background: rgba(10,10,10,0.78);
 }
 
 /* Navbar Brand */
@@ -117,31 +120,129 @@ body {
 .right-section {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 14px; /* tighter spacing to fit toggle + GitHub */
 }
 
-/* Dark Mode Toggle */
-.theme-toggle {
-    background: none;
-    border: none;
+/* Theme toggle group (sun – switch – moon) */
+.theme-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.theme-sun,
+.theme-moon {
+    color: var(--text-secondary);
+}
+
+/* Switch */
+.theme-switch {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.08);
+    position: relative;
+    padding: 0;
     cursor: pointer;
-    font-size: 20px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.theme-switch .knob {
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(0, -50%);
+    transition: left 0.2s ease, background 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.theme-switch.active {
+    background: rgba(255,255,255,0.16);
+    border-color: rgba(255,255,255,0.18);
+}
+.theme-switch.active .knob {
+    left: 22px;
+    background: #111;
+}
+
+/* Try Now button: black/white in light, inverted in dark, pill-like */
+.nav-try {
+    background: #111;
+    color: #fff !important;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    text-decoration: none;
+}
+.nav-try:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+}
+.navbar.dark-mode .nav-try {
+    background: #fff;
+    color: #000 !important;
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 6px 16px rgba(255,255,255,0.12);
+}
+.navbar.dark-mode .nav-try:hover {
+    box-shadow: 0 10px 26px rgba(255,255,255,0.22);
+}
+
+/* GitHub icon button */
+.nav-github {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    border-radius: 8px;
     color: var(--text-primary);
-    transition: color 0.3s ease-in-out;
+    background: transparent;
+    border: 1px solid rgba(15,23,36,0.06);
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+.nav-github:hover {
+    background: rgba(15,23,36,0.06);
+}
+.navbar.dark-mode .nav-github {
+    color: #fff;
+    border-color: rgba(255,255,255,0.10);
+}
+.navbar.dark-mode .nav-github:hover {
+    background: rgba(255,255,255,0.08);
 }
 
-.theme-toggle:hover {
-    color: #6b5bff; /* match hero highlight */
+/* Mobile Menu (sheet) */
+.mobile-menu {
+    display: none; /* Hide by default */
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideIn 0.3s ease-out;
 }
 
-/* Hamburger Menu */
-.hamburger {
-    display: none;
-    cursor: pointer;
-    font-size: 25px;
+/* Force-hide hamburger and mobile sheet on desktop widths */
+@media (min-width: 769px) {
+    .hamburger { display: none !important; }
+    .mobile-menu { display: none !important; }
 }
 
-/* Mobile Menu */
+/* Legacy dropdown (kept for fallback) */
 @media (max-width: 768px) {
     .menu {
         display: none;
@@ -153,7 +254,8 @@ body {
         position: absolute;
         top: 70px;
         right: 10px;
-        background: rgba(0, 0, 0, 0.85);
+        background: var(--card-background);
+        color: var(--text-primary);
         padding: 15px;
         border-radius: 10px;
         backdrop-filter: blur(8px);
@@ -165,28 +267,55 @@ body {
     }
 
     .menu.active a {
-        color: white;
+        color: var(--text-primary);
         font-size: 18px;
         transition: color 0.3s ease-in-out;
     }
 
     .menu.active a:hover {
-        color: #6b5bff; /* match hero highlight */
+        color: #6b5bff;
     }
 
     .hamburger {
         display: block;
     }
+
+    .right-section {
+        gap: 12px;
+    }
 }
 
 /* Mobile Menu Fade-in Animation */
 @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Menu Slide-in Animation */
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateX(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
+}
+
+/* xs/sm: tighter padding and gaps */
+@media (max-width: 479px) {
+  .navbar { padding: 10px 12px; }
+  .right-section { gap: 10px; }
+  .menu { gap: 12px; }
+}
+/* md: default */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar { padding: 12px 18px; }
+}
+/* lg+ widen spacing a bit */
+@media (min-width: 1024px) {
+  .navbar { padding: 14px 20px; }
+  .menu { gap: 24px; }
+  .right-section { gap: 16px; }
 }

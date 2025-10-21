@@ -25,7 +25,6 @@ const steps = [
   },
 ];
 
-
 const UserManual = () => {
   return (
     <section id="manual" className="user-manual" style={{ paddingBottom: "6rem" }}>
@@ -39,6 +38,7 @@ const UserManual = () => {
                 className="demo-gif"
                 src={step.media}
                 alt={`Step ${step.id} - ${step.title}`}
+                loading="lazy" /* added lazy loading */
               />
             </div>
 

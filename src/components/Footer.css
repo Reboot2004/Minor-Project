@@ -13,6 +13,8 @@
   flex-wrap: wrap;
   gap: 2rem;
   margin-bottom: 1.5rem;
+  max-width: var(--site-max-width);
+  margin: 0 auto; /* center inner footer */
 }
 
 .footer-brand h3 {

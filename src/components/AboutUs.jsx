@@ -73,18 +73,7 @@ const AboutUs = () => {
           building core features to conducting experiments and writing detailed
           documentation.
         </p>
-        <p>
-          For a deeper dive into our methodology and findings, please refer to
-          our published paper:{" "}
-          <a
-            href="https://ieeexplore.ieee.org" // replace with your IEEE paper link
-            target="_blank"
-            rel="noreferrer"
-          >
-            IEEE Paper
-          </a>
-        </p>
-      </div>
+        </div>
     </section>
   );
 };

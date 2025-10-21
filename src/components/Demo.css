@@ -4,6 +4,8 @@
   font-family: "Inter", sans-serif;
   text-align: center;
   color: var(--text-primary);
+  width: min(var(--site-max-width), calc(100% - 32px));
+  margin: 0 auto; /* center within page */
 }
 
 /* Progress bar */
@@ -98,6 +100,18 @@ input[type="file"] {
   margin: 0 auto;
 }
 
+/* Dropdown */
+.dropdown {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 1rem;
+  background: transparent;
+  color: var(--text-primary);
+  width: 100%;           /* fill container on small screens */
+  max-width: 360px;      /* keep readable width */
+}
+
 .loading {
   margin-top: 1rem;
   color: var(--text-secondary);
@@ -152,16 +166,7 @@ input[type="file"] {
   cursor: not-allowed;
 }
 
-/* Dropdown */
-.dropdown {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  margin-bottom: 1rem;
-  background: transparent;
-  color: var(--text-primary);
-}
-
+/* Results section */
 .results {
   text-align: left;
   background: var(--card-background);
@@ -342,5 +347,10 @@ input[type="file"] {
 
   .progress {
     gap: 8px;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    max-width: 360px;
   }
 }
