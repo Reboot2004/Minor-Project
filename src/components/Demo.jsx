@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Loader2 } from "lucide-react"; // spinner icon
+import React, { useState, useEffect } from "react";
+import { Loader2, Upload, CheckCircle, AlertCircle, Download, ChevronRight, ChevronLeft, Eye, EyeOff, FileImage, Brain, Activity, ZoomIn, ZoomOut, X } from "lucide-react";
 import "./Demo.css";
 const API_BASE = import.meta.env.VITE_API_BASE_URL
+
 const Demo = () => {
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
@@ -12,6 +13,24 @@ const Demo = () => {
   const [magval, setMagval] = useState("");
   const [result, setResult] = useState(null);
   const [viewMode, setViewMode] = useState("summary"); // "summary" or "detailed"
+  const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  // track per-step status -> null | 'success' | 'error'
+  const [stepStatus, setStepStatus] = useState({ 1: null, 2: null, 3: null });
+
+  // Image modal state (for Summary view image click)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalSrc, setModalSrc] = useState(null);
+  const [zoom, setZoom] = useState(1);
+
+  // small helper to format file size
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B","KB","MB","GB","TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  };
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -19,6 +38,31 @@ const Demo = () => {
     if (selected) {
       setFile(selected);
       setPreview(URL.createObjectURL(selected));
+      setError(null);
+    }
+  };
+
+  // Handle drag and drop
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const selected = e.dataTransfer.files[0];
+      setFile(selected);
+      setPreview(URL.createObjectURL(selected));
+      setError(null);
     }
   };
 
@@ -26,6 +70,7 @@ const Demo = () => {
   const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
+    setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -36,14 +81,26 @@ const Demo = () => {
         body: formData,
       });
 
-      const data = await res.json();
-      console.log("Upload response:", data);
+      let data = null;
+      try { data = await res.json(); } catch (_) { /* ignore non-JSON */ }
+      console.log("Upload response:", data ?? res.status);
 
-      if (data.message.includes("success")) {
-        setStep(2); // move to next step only on success
+      const isSuccess =
+        res.ok ||
+        (typeof data?.status === "string" && data.status.toLowerCase() === "success") ||
+        (typeof data?.message === "string" && data.message.toLowerCase().includes("success"));
+
+      if (isSuccess) {
+        setStepStatus((s) => ({ ...s, 1: "success" }));
+        setStep(2); // go to Step 2 after successful upload
+      } else {
+        setStepStatus((s) => ({ ...s, 1: "error" }));
+        setError(data?.message || "Upload failed. Please try again.");
       }
     } catch (error) {
       console.error("Upload failed:", error);
+      setStepStatus((s) => ({ ...s, 1: "error" }));
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -53,6 +110,7 @@ const Demo = () => {
   const handleGenerate = async () => {
     if (!model || !xaiMethod || !magval) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`${API_BASE}/api/inputform`, {
         method: "POST",
@@ -66,17 +124,71 @@ const Demo = () => {
       const data = await res.json();
       console.log("Result:", data);
       setResult(data);
+      setStepStatus((s) => ({ ...s, 2: "success", 3: data && data.image1 ? "success" : s[3] }));
       setStep(3);
     } catch (error) {
       console.error("Processing failed:", error);
+      setStepStatus((s) => ({ ...s, 2: "error" }));
+      setError("Processing failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleStepClick = (num) => {
-    setStep(num);
+    // Allow current, previous, or next completed step navigation
+    const canGoTo = (target) => {
+      if (target <= step) return true;
+      if (target === 2) return stepStatus[1] === "success";
+      if (target === 3) return stepStatus[1] === "success" && stepStatus[2] === "success";
+      return false;
+    };
+    if (canGoTo(num)) setStep(num);
   };
+
+  const resetAll = () => {
+    setFile(null);
+    setPreview(null);
+    setModel("");
+    setXaiMethod("");
+    setMagval("");
+    setResult(null);
+    setError(null);
+    setLoading(false);
+    setStepStatus({ 1: null, 2: null, 3: null });
+    setViewMode("summary");
+    setStep(1);
+  };
+
+  // Image modal controls
+  const openModal = (src) => {
+    setModalSrc(src);
+    setZoom(1);
+    setModalOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalSrc(null);
+    document.body.style.overflow = "";
+  };
+  const zoomIn = () => setZoom((z) => Math.min(5, z + 0.25));
+  const zoomOut = () => setZoom((z) => Math.max(0.5, z - 0.25));
+  const resetZoom = () => setZoom(1);
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const dir = Math.sign(e.deltaY);
+    setZoom((z) => {
+      const next = z + (dir < 0 ? 0.1 : -0.1);
+      return Math.min(5, Math.max(0.5, next));
+    });
+  };
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") closeModal(); };
+    if (modalOpen) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalOpen]);
 
   // Render images in Summary View
   const renderSummaryView = () => {
@@ -86,20 +198,32 @@ const Demo = () => {
       <div className="summary-view">
         <div className="image-pair">
           <div className="pair-item">
-            <h4>Original Image</h4>
-            <img
-              src={`data:image/jpeg;base64,${result.image1}`}
-              alt="Original"
-              style={{ width: "100%", height: "auto" }}
-            />
+            <div className="image-header">
+              <FileImage size={20} />
+              <h4>Original Image</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.image1}`)}
+                src={`data:image/jpeg;base64,${result.image1}`}
+                alt="Original"
+              />
+            </div>
           </div>
           <div className="pair-item">
-            <h4>Segmentation Mask</h4>
-            <img
-              src={`data:image/jpeg;base64,${result.mask1}`}
-              alt="Mask"
-              style={{ width: "100%", height: "auto" }}
-            />
+            <div className="image-header">
+              <Activity size={20} />
+              <h4>Segmentation Mask</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.mask1}`)}
+                src={`data:image/jpeg;base64,${result.mask1}`}
+                alt="Mask"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -112,56 +236,64 @@ const Demo = () => {
 
     return (
       <div className="detailed-view">
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
-                Original Image
-              </th>
-              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
-                Segmentation Mask
-              </th>
-              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
-                XAI Heatmap
-              </th>
-              <th style={{ width: "25%", fontSize: "18px", padding: "10px" }}>
-                Cell Descriptor
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
-                <img
-                  src={`data:image/jpeg;base64,${result.image1}`}
-                  alt="Original"
-                  style={{ width: "80%", height: "auto" }}
-                />
-              </td>
-              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
-                <img
-                  src={`data:image/jpeg;base64,${result.mask1}`}
-                  alt="Mask"
-                  style={{ width: "80%", height: "auto" }}
-                />
-              </td>
-              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
-                <img
-                  src={`data:image/jpeg;base64,${result.inter1}`}
-                  alt="Heatmap"
-                  style={{ width: "80%", height: "auto" }}
-                />
-              </td>
-              <td style={{ width: "25%", padding: "10px", textAlign: "center" }}>
-                <img
-                  src={`data:image/jpeg;base64,${result.table1}`}
-                  alt="Table"
-                  style={{ width: "80%", height: "auto" }}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="image-grid">
+          <div className="grid-item">
+            <div className="image-header">
+              <FileImage size={20} />
+              <h4>Original Image</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.image1}`)}
+                src={`data:image/jpeg;base64,${result.image1}`}
+                alt="Original"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <div className="image-header">
+              <Activity size={20} />
+              <h4>Segmentation Mask</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.mask1}`)}
+                src={`data:image/jpeg;base64,${result.mask1}`}
+                alt="Mask"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <div className="image-header">
+              <Brain size={20} />
+              <h4>XAI Heatmap</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.inter1}`)}
+                src={`data:image/jpeg;base64,${result.inter1}`}
+                alt="Heatmap"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <div className="image-header">
+              <Activity size={20} />
+              <h4>Cell Descriptor</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.table1}`)}
+                src={`data:image/jpeg;base64,${result.table1}`}
+                alt="Table"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -184,6 +316,7 @@ const Demo = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download failed:", error);
+      setError("Download failed. Please try again.");
     }
   };
 
@@ -205,61 +338,119 @@ const Demo = () => {
       <br />
       <section className="demo">
         {/* Progress Bar */}
-        <div className="progress">
-          {[1, 2, 3].map((num, idx) => (
-            <React.Fragment key={num}>
-              <button
-                type="button"
-                className={`progress-step ${step >= num ? "active" : ""}`}
-                onClick={() => handleStepClick(num)}
-                aria-current={step === num}
-              >
-                <span className="step-number">{num}</span>
-                <span className="step-label">
-                  {num === 1 ? "Upload" : num === 2 ? "Model" : "Result"}
-                </span>
-              </button>
+        <div className="progress-container">
+          <div className="progress">
+            {[1, 2, 3].map((num, idx) => (
+              <React.Fragment key={num}>
+                <button
+                  type="button"
+                  className={`progress-step ${stepStatus[num] ?? ""} ${step === num ? "current" : ""}`}
+                  onClick={() => handleStepClick(num)}
+                  aria-current={step === num}
+                >
+                  <div className="step-icon">
+                    {stepStatus[num] === "success" ? (
+                      <CheckCircle size={24} />
+                    ) : stepStatus[num] === "error" ? (
+                      <AlertCircle size={24} />
+                    ) : (
+                      <span className="step-number">{num}</span>
+                    )}
+                  </div>
+                  {/* step labels removed */}
+                </button>
 
-              {idx < 2 && (
-                <div
-                  className={`progress-connector ${step > num ? "active" : ""}`}
-                  aria-hidden
-                />
-              )}
-            </React.Fragment>
-          ))}
+                {idx < 2 && (
+                  <div
+                    className={`progress-connector ${stepStatus[num] === "success" ? "success" : stepStatus[num] === "error" ? "error" : ""}`}
+                    aria-hidden
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
         {/* Step 1: Upload */}
         {step === 1 && (
           <div className="demo-step">
-            <h3>Step 1: Upload Image</h3>
-            <input
-              type="file"
-              accept=".png,.jpg,.jpeg,.bmp,.zip"
-              onChange={handleFileChange}
-            />
+            <div className="step-header">
+              <h3>Step 1: Upload Image</h3>
+              <p>Upload a medical image for analysis</p>
+            </div>
 
-            {preview && (
-              <div className="preview">
-                <img src={preview} alt="Uploaded" />
-              </div>
-            )}
-
-            {loading ? (
-              <div className="loading">
-                <Loader2 className="spinner" size={28} /> Uploading...
-              </div>
-            ) : (
-              file && (
-                <button
-                  onClick={handleUpload}
-                  className="next-btn"
-                  style={{ marginTop: 12 }}
+            {!file ? (
+              // No file selected: show drag & drop area
+              <>
+                <div 
+                  className={`upload-area ${dragActive ? "drag-active" : ""}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
                 >
-                  Upload & Next →
-                </button>
-              )
+                  <input
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.bmp,.zip"
+                    onChange={handleFileChange}
+                    id="file-upload"
+                    className="file-input"
+                  />
+                  <label htmlFor="file-upload" className="upload-label">
+                    <Upload size={48} />
+                    <span className="upload-text">
+                      {dragActive ? "Drop your file here" : "Drag & drop your image here or click to browse"}
+                    </span>
+                    <span className="upload-subtext">Supports: PNG, JPG, JPEG, BMP, ZIP</span>
+                  </label>
+                </div>
+                {error && (
+                  <div className="error-message">
+                    <AlertCircle size={20} />
+                    <span>{error}</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              // File selected (before or after upload): hide upload area, show preview + meta
+              <>
+                <div className="upload-summary">
+                  {file.type?.startsWith("image/") && preview && (
+                    <div className="preview">
+                      <img src={preview} alt="Uploaded" />
+                    </div>
+                  )}
+                  <div className="file-meta">
+                    <p><strong>File:</strong> {file.name}</p>
+                    <p><strong>Size:</strong> {formatBytes(file.size)}</p>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="error-message">
+                    <AlertCircle size={20} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {loading ? (
+                  <div className="loading">
+                    <Loader2 className="spinner" size={28} />
+                    <span>Uploading...</span>
+                  </div>
+                ) : (
+                  // Show Upload button only until success; hide once uploaded
+                  stepStatus[1] !== "success" && (
+                    <button
+                      onClick={handleUpload}
+                      className="upload-btn"
+                    >
+                      Upload
+                      <ChevronRight size={20} />
+                    </button>
+                  )
+                )}
+              </>
             )}
           </div>
         )}
@@ -267,46 +458,80 @@ const Demo = () => {
         {/* Step 2: Choose Model (XAI auto-set) */}
         {step === 2 && (
           <div className="demo-step">
-            <h3>Step 2: Choose Model</h3>
-            <select
-              value={model}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="dropdown"
-            >
-              <option value="">Select a model</option>
-              <option value="vgg16">VGG16 Adapted (LRP)</option>
-              <option value="xception">Xception Net (GradCAM++)</option>
-            </select>
+            <div className="step-header">
+              <h3>Step 2: Choose Model</h3>
+              <p>Select a model for image analysis</p>
+            </div>
+            
+            <div className="model-selection">
+              <div className="form-group">
+                <label htmlFor="model-select">Model</label>
+                <select
+                  id="model-select"
+                  value={model}
+                  onChange={(e) => handleModelChange(e.target.value)}
+                  className="dropdown"
+                >
+                  <option value="">Select a model</option>
+                  <option value="vgg16">VGG16 Adapted (LRP)</option>
+                  <option value="xception">Xception Net (GradCAM++)</option>
+                </select>
+              </div>
 
-            {xaiMethod && (
-              <p style={{ marginTop: 8, color: "var(--text-secondary)" }}>
-                XAI Method: <strong>{xaiMethod}</strong>
-              </p>
+              {xaiMethod && (
+                <div className="info-box">
+                  <Brain size={20} />
+                  <div>
+                    <p>XAI Method</p>
+                    <strong>{xaiMethod}</strong>
+                  </div>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="mag-input">Magnification Value</label>
+                <input
+                  id="mag-input"
+                  type="number"
+                  placeholder="Enter Magnification Value"
+                  value={magval}
+                  onChange={(e) => setMagval(e.target.value)}
+                  className="text-input"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="error-message">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
             )}
 
-            <input
-              type="number"
-              placeholder="Enter Magnification Value"
-              value={magval}
-              onChange={(e) => setMagval(e.target.value)}
-              className="dropdown"
-              style={{ marginTop: 10 }}
-            />
-
-            <div style={{ marginTop: 12 }}>
+            <div className="step-actions">
               <button
                 onClick={() => setStep(1)}
-                className="next-btn"
-                style={{ marginRight: 8, background: "#e5e7eb", color: "#111827" }}
+                className="back-btn"
               >
-                ← Back
+                <ChevronLeft size={20} />
+                Back
               </button>
               <button
                 onClick={handleGenerate}
-                className="next-btn"
+                className="upload-btn"
                 disabled={!model || !xaiMethod || !magval || loading}
               >
-                {loading ? <Loader2 className="spinner" size={20} /> : "Generate"}
+                {loading ? (
+                  <>
+                    <Loader2 className="spinner" size={20} />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Generate
+                    <ChevronRight size={20} />
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -315,60 +540,43 @@ const Demo = () => {
         {/* Step 3: Results */}
         {step === 3 && (
           <div className="demo-step">
-            <h3>Step 3: Summary & Results</h3>
+            <div className="step-header">
+              <h3>Step 3: Analysis Results</h3>
+              <p>View and download your analysis results</p>
+            </div>
+            
             {loading ? (
               <div className="loading">
-                <Loader2 className="spinner" size={28} /> Generating results...
+                <Loader2 className="spinner" size={28} />
+                <span>Generating results...</span>
               </div>
             ) : (
               result && (
                 <>
                   {/* View Mode Toggle */}
-                  <div className="view-toggle" style={{ marginBottom: "20px", textAlign: "center" }}>
-                    <button
-                      className={`toggle-btn ${viewMode === "summary" ? "active" : ""}`}
-                      onClick={() => setViewMode("summary")}
-                      style={{
-                        padding: "8px 20px",
-                        marginRight: "10px",
-                        border: "1px solid #007bff",
-                        background: viewMode === "summary" ? "#007bff" : "white",
-                        color: viewMode === "summary" ? "white" : "#007bff",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Summary View
-                    </button>
-                    <button
-                      className={`toggle-btn ${viewMode === "detailed" ? "active" : ""}`}
-                      onClick={() => setViewMode("detailed")}
-                      style={{
-                        padding: "8px 20px",
-                        border: "1px solid #007bff",
-                        background: viewMode === "detailed" ? "#007bff" : "white",
-                        color: viewMode === "detailed" ? "white" : "#007bff",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Detailed View
-                    </button>
+                  <div className="view-controls">
+                    <div className="view-toggle">
+                      <button
+                        className={`toggle-btn ${viewMode === "summary" ? "active" : ""}`}
+                        onClick={() => setViewMode("summary")}
+                      >
+                        <Eye size={18} />
+                        Summary View
+                      </button>
+                      <button
+                        className={`toggle-btn ${viewMode === "detailed" ? "active" : ""}`}
+                        onClick={() => setViewMode("detailed")}
+                      >
+                        <EyeOff size={18} />
+                        Detailed View
+                      </button>
+                    </div>
 
-                    {/* Download Button */}
                     <button
                       onClick={handleDownload}
                       className="download-btn"
-                      style={{
-                        padding: "8px 20px",
-                        marginLeft: "20px",
-                        border: "1px solid #28a745",
-                        background: "#28a745",
-                        color: "white",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
                     >
+                      <Download size={18} />
                       Download Results
                     </button>
                   </div>
@@ -378,18 +586,24 @@ const Demo = () => {
                     {viewMode === "summary" ? renderSummaryView() : renderDetailedView()}
                   </div>
 
-                  <div style={{ marginTop: "20px", display: "flex", gap: 8, justifyContent: "center" }}>
+                  {error && (
+                    <div className="error-message">
+                      <AlertCircle size={20} />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="step-actions">
                     <button
                       onClick={() => setStep(2)}
-                      className="next-btn"
-                      style={{ background: "#e5e7eb", color: "#111827" }}
+                      className="back-btn"
                     >
-                      ← Back to Model
+                      <ChevronLeft size={20} />
+                      Back to Model
                     </button>
                     <button
-                      onClick={() => setStep(1)}
-                      className="next-btn"
-                      style={{ marginLeft: 8 }}
+                      onClick={resetAll}
+                      className="upload-btn"
                     >
                       Start Over
                     </button>
@@ -400,6 +614,30 @@ const Demo = () => {
           </div>
         )}
       </section>
+
+      {/* Image Modal */}
+      {modalOpen && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-toolbar">
+              <button className="modal-btn" onClick={zoomOut} aria-label="Zoom out"><ZoomOut size={18} /></button>
+              <span className="zoom-value">{Math.round(zoom * 100)}%</span>
+              <button className="modal-btn" onClick={zoomIn} aria-label="Zoom in"><ZoomIn size={18} /></button>
+              <button className="modal-btn" onClick={resetZoom} aria-label="Reset zoom">Reset</button>
+              <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+            </div>
+            <div className="modal-image-wrapper" onWheel={handleWheel}>
+              <img
+                className="modal-image"
+                src={modalSrc}
+                alt="Preview"
+                /* width scaling allows natural scrolling/panning as zoom increases */
+                style={{ width: `${zoom * 100}%`, maxWidth: "none" }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
