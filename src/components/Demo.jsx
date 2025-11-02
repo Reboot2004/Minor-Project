@@ -135,7 +135,9 @@ const Demo = () => {
       });
 
       let data = null;
-      try { data = await res.json(); } catch (_) { /* ignore non-JSON */ }
+      try { data = await res.json(); } catch {
+        /* ignore non-JSON */
+      }
       console.log("Upload response:", data ?? res.status);
 
       const isSuccess =
@@ -328,6 +330,9 @@ const Demo = () => {
   const renderDetailedView = () => {
     if (!result || !result.image1) return null;
 
+    // Check for heatmapImage in the new response structure
+    const heatmapImage = result?.results?.heatmapImage;
+
     return (
       <div className="detailed-view">
         <div className="image-grid">
@@ -359,6 +364,22 @@ const Demo = () => {
               />
             </div>
           </div>
+          {heatmapImage && (
+            <div className="grid-item">
+              <div className="image-header">
+                <Brain size={20} />
+                <h4>Heatmap Image</h4>
+              </div>
+              <div className="image-container">
+                <img
+                  className="img-clickable"
+                  onClick={() => openModal(`data:image/jpeg;base64,${heatmapImage}`)}
+                  src={`data:image/jpeg;base64,${heatmapImage}`}
+                  alt="Heatmap"
+                />
+              </div>
+            </div>
+          )}
           <div className="grid-item">
             <div className="image-header">
               <Brain size={20} />
