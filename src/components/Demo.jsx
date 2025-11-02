@@ -305,7 +305,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase())}`}>
+            <p className={`classification-label ${result.classification.charAt(0).toUpperCase() + result.classification.slice(1).toLowerCase()}`}>
             {result.classification}
             </p>
           </div>
@@ -325,17 +325,17 @@ const Demo = () => {
               />
             </div>
           </div>
-          <div className="pair-item">
+          <div className="grid-item">
             <div className="image-header">
-              <Activity size={20} />
-              <h4>Segmentation Mask</h4>
+              <Brain size={20} />
+              <h4>XAI Heatmap</h4>
             </div>
             <div className="image-container">
               <img
                 className="img-clickable"
-                onClick={() => openModal(`data:image/jpeg;base64,${result.mask1}`)}
-                src={`data:image/jpeg;base64,${result.mask1}`}
-                alt="Mask"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.inter1}`)}
+                src={`data:image/jpeg;base64,${result.inter1}`}
+                alt="Heatmap"
               />
             </div>
           </div>
@@ -356,7 +356,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase())}`}>
+            <p className={`classification-label ${result.classification.charAt(0).toUpperCase() + result.classification.slice(1).toLowerCase()}`}>
             {result.classification}
             </p>
           </div>
@@ -378,21 +378,6 @@ const Demo = () => {
           </div>
           <div className="grid-item">
             <div className="image-header">
-              <Activity size={20} />
-              <h4>Segmentation Mask</h4>
-            </div>
-            <div className="image-container">
-              <img
-                className="img-clickable"
-                onClick={() => openModal(`data:image/jpeg;base64,${result.mask1}`)}
-                src={`data:image/jpeg;base64,${result.mask1}`}
-                alt="Mask"
-              />
-            </div>
-          </div>
-          
-          <div className="grid-item">
-            <div className="image-header">
               <Brain size={20} />
               <h4>XAI Heatmap</h4>
             </div>
@@ -402,6 +387,20 @@ const Demo = () => {
                 onClick={() => openModal(`data:image/jpeg;base64,${result.inter1}`)}
                 src={`data:image/jpeg;base64,${result.inter1}`}
                 alt="Heatmap"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <div className="image-header">
+              <Activity size={20} />
+              <h4>Segmentation Mask</h4>
+            </div>
+            <div className="image-container">
+              <img
+                className="img-clickable"
+                onClick={() => openModal(`data:image/jpeg;base64,${result.mask1}`)}
+                src={`data:image/jpeg;base64,${result.mask1}`}
+                alt="Mask"
               />
             </div>
           </div>
