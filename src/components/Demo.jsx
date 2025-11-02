@@ -305,7 +305,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.charAt(0).toUpperCase() + result.classification.slice(1).toLowerCase()}`}>
+            <p className={`classification-label ${result.classification}`}>
             {result.classification}
             </p>
           </div>
@@ -356,7 +356,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.charAt(0).toUpperCase() + result.classification.slice(1).toLowerCase()}`}>
+            <p className={`classification-label ${result.classification}`}>
             {result.classification}
             </p>
           </div>
