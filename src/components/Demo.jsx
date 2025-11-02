@@ -373,7 +373,7 @@ const Demo = () => {
               />
             </div>
           </div>
-          {heatmapImage && (
+          /* {heatmapImage && (
             <div className="grid-item">
               <div className="image-header">
                 <Brain size={20} />
@@ -388,7 +388,7 @@ const Demo = () => {
                 />
               </div>
             </div>
-          )}
+          )} */
           <div className="grid-item">
             <div className="image-header">
               <Brain size={20} />
