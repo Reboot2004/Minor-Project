@@ -695,11 +695,13 @@
 }
 
 .classification-label {
-  font-size: 1.2rem;
+  text-transform: capitalize;
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   display: inline-block;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .classification-label.normal {
