@@ -305,7 +305,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase()}`}>
+            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase())}`}>
             {result.classification}
             </p>
           </div>
@@ -356,7 +356,7 @@ const Demo = () => {
         {result?.classification && (
           <div className="classification-box">
             <h4>Predicted Classification</h4>
-            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase()}`}>
+            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase())}`}>
             {result.classification}
             </p>
           </div>
