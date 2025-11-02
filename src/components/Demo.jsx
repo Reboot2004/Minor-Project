@@ -179,6 +179,15 @@ const Demo = () => {
       const data = await res.json();
       console.log("Result:", data);
       setResult(data);
+      const normalized = {
+        ...data,
+        image1: data.results?.originalImage || "",
+        mask1: data.results?.maskImage || "",
+        inter1: data.results?.heatmapImage || "",
+        table1: data.results?.tableImage || "",
+      };
+      setResult(normalized);
+
       setStepStatus((s) => ({ ...s, 2: "success", 3: data && data.image1 ? "success" : s[3] }));
       setStep(3);
     } catch (error) {
