@@ -186,8 +186,9 @@ const Demo = () => {
         inter1: data.results?.heatmapImage || "",
         table1: data.results?.tableImage || "",
       };
+      normalized.classification = data.classification || "Unknown";
       setResult(normalized);
-
+      
       setStepStatus((s) => ({ ...s, 2: "success", 3: data && data.image1 ? "success" : s[3] }));
       setStep(3);
     } catch (error) {
@@ -301,6 +302,14 @@ const Demo = () => {
 
     return (
       <div className="summary-view">
+        {result?.classification && (
+          <div className="classification-box">
+            <h4>Predicted Classification</h4>
+            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase()}`}>
+            {result.classification}
+            </p>
+          </div>
+        )}
         <div className="image-pair">
           <div className="pair-item">
             <div className="image-header">
@@ -344,6 +353,14 @@ const Demo = () => {
 
     return (
       <div className="detailed-view">
+        {result?.classification && (
+          <div className="classification-box">
+            <h4>Predicted Classification</h4>
+            <p className={`classification-label ${result.classification.toLowerCase().replace(/[-\s]+(.)/g, (_, char) => char.toUpperCase()}`}>
+            {result.classification}
+            </p>
+          </div>
+        )}        
         <div className="image-grid">
           <div className="grid-item">
             <div className="image-header">
@@ -606,6 +623,9 @@ const Demo = () => {
                   value={magval}
                   onChange={(e) => setMagval(e.target.value)}
                   className="text-input"
+                  min={0}
+                  max={1}
+                  step={0.1}
                 />
               </div>
             </div>
