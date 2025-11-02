@@ -373,22 +373,7 @@ const Demo = () => {
               />
             </div>
           </div>
-          /* {heatmapImage && (
-            <div className="grid-item">
-              <div className="image-header">
-                <Brain size={20} />
-                <h4>Heatmap Image</h4>
-              </div>
-              <div className="image-container">
-                <img
-                  className="img-clickable"
-                  onClick={() => openModal(`data:image/jpeg;base64,${heatmapImage}`)}
-                  src={`data:image/jpeg;base64,${heatmapImage}`}
-                  alt="Heatmap"
-                />
-              </div>
-            </div>
-          )} */
+          
           <div className="grid-item">
             <div className="image-header">
               <Brain size={20} />
