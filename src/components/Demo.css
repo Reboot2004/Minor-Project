@@ -684,3 +684,30 @@
     width: 40px;
   }
 }
+.classification-box {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.classification-box h4 {
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.classification-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.classification-label.normal {
+  background-color: #e0f7e9;
+  color: #007a3d;
+}
+
+.classification-label.abnormal {
+  background-color: #fdecea;
+  color: #b71c1c;
+}
