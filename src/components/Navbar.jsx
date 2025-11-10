@@ -40,9 +40,7 @@ const Navbar = () => {
   const goAndScroll = (id) => {
     setNav(false);
     if (location.pathname !== '/') {
-      // navigate to home first, then scroll after a short delay
       navigate('/');
-      // delay gives React time to render the home sections
       setTimeout(() => scrollToId(id), 150);
     } else {
       scrollToId(id);
@@ -51,7 +49,6 @@ const Navbar = () => {
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${darkMode ? 'dark-mode' : ''}`}>
-      {/* BRAND: visually plain text but routes to "/" on click */}
       <div
         className="navbar-brand"
         role="button"
@@ -64,24 +61,21 @@ const Navbar = () => {
       </div>
 
       <ul className={`menu ${nav ? 'active' : ''}`}>
-        {/* HOME -> route to root (/) */}
         <li>
           <RouterLink to="/" onClick={goHome}>Home</RouterLink>
         </li>
-
         {/* In-page scroll links */}
         <li>
           <button type="button" className="nav-link" onClick={() => goAndScroll('project')}>Project</button>
         </li>
-        {/* <li>
-          <ScrollLink to="methodology" smooth={true} duration={500} onClick={() => setNav(false)}>Methodology</ScrollLink>
-        </li> */}
         <li>
           <button type="button" className="nav-link" onClick={() => goAndScroll('manual')}>User Manual</button>
         </li>
         <li>
-          {/* About Us scrolls to the team section */}
           <button type="button" className="nav-link" onClick={() => goAndScroll('team')}>About Us</button>
+        </li>
+        <li>
+          <RouterLink to="/results" onClick={() => setNav(false)}>Results</RouterLink>
         </li>
       </ul>
 
@@ -134,6 +128,9 @@ const Navbar = () => {
           </li>
           <li>
             <button type="button" className="nav-link" onClick={() => goAndScroll('team')}>About Us</button>
+          </li>
+          <li>
+            <RouterLink to="/results" onClick={() => setNav(false)}>Results</RouterLink>
           </li>
         </ul>
       )}

@@ -5,7 +5,8 @@ import Hero from "./components/Hero";
 import Project from "./components/Project";
 import UserManual from "./components/UserManual";
 import AboutUs from "./components/AboutUs";
-import Demo from "./components/Demo"; // new route component
+import Demo from "./components/Demo"; 
+import Results from "./components/Results"; 
 import "./App.css";
 import Footer from "./components/Footer";
 
@@ -51,6 +52,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/demo" element={<Demo />} />
+            <Route path="/results" element={<Results />} />
           </Routes>
         </div>
       </Router>
