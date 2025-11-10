@@ -59,12 +59,12 @@ const Demo = () => {
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
 
-  // persist file (meta + preview) and set state
+  // persist and set file (meta + preview) and set state
   const persistAndSetFile = async (selected) => {
     setFile(selected);
-    // save meta
+    // save meta -> use sessionStorage so it is cleared when the tab/window is closed
     try {
-      localStorage.setItem(
+      sessionStorage.setItem(
         LS_KEYS.fileMeta,
         JSON.stringify({ name: selected.name, size: selected.size, type: selected.type })
       );
@@ -76,15 +76,15 @@ const Demo = () => {
       try {
         const dataUrl = await readFileAsDataURL(selected);
         setPreview(dataUrl);
-        localStorage.setItem(LS_KEYS.fileDataURL, dataUrl);
+        sessionStorage.setItem(LS_KEYS.fileDataURL, dataUrl);
       } catch {
         // fallback to non-persistent preview
         setPreview(URL.createObjectURL(selected));
-        localStorage.removeItem(LS_KEYS.fileDataURL);
+        sessionStorage.removeItem(LS_KEYS.fileDataURL);
       }
     } else {
       setPreview(null);
-      localStorage.removeItem(LS_KEYS.fileDataURL);
+      sessionStorage.removeItem(LS_KEYS.fileDataURL);
     }
   };
 
@@ -178,7 +178,8 @@ const Demo = () => {
       });
       const data = await res.json();
       console.log("Result:", data);
-      setResult(data);
+
+      // build normalized result first, then set state and step statuses based on it
       const normalized = {
         ...data,
         image1: data.results?.originalImage || "",
@@ -188,8 +189,9 @@ const Demo = () => {
       };
       normalized.classification = data.classification || "Unknown";
       setResult(normalized);
-      
-      setStepStatus((s) => ({ ...s, 2: "success", 3: data && data.image1 ? "success" : s[3] }));
+
+      const hasImage = !!normalized.image1;
+      setStepStatus((s) => ({ ...s, 2: "success", 3: hasImage ? "success" : s[3] }));
       setStep(3);
     } catch (error) {
       console.error("Processing failed:", error);
@@ -213,15 +215,15 @@ const Demo = () => {
 
   // rehydrate on mount
   useEffect(() => {
-    // restore model and magval
-    const savedModel = localStorage.getItem(LS_KEYS.model);
+    // restore model and magval from sessionStorage so they are cleared on tab/window close
+    const savedModel = sessionStorage.getItem(LS_KEYS.model);
     if (savedModel) handleModelChange(savedModel);
-    const savedMag = localStorage.getItem(LS_KEYS.magval);
+    const savedMag = sessionStorage.getItem(LS_KEYS.magval);
     if (savedMag !== null) setMagval(savedMag);
 
-    // restore file (if an image was saved)
-    const metaStr = localStorage.getItem(LS_KEYS.fileMeta);
-    const dataUrl = localStorage.getItem(LS_KEYS.fileDataURL);
+    // restore file (if an image was saved) -- read from sessionStorage now
+    const metaStr = sessionStorage.getItem(LS_KEYS.fileMeta);
+    const dataUrl = sessionStorage.getItem(LS_KEYS.fileDataURL);
     if (metaStr && dataUrl) {
       try {
         const meta = JSON.parse(metaStr);
@@ -236,15 +238,15 @@ const Demo = () => {
     }
   }, []);
 
-  // keep model/magval in localStorage
+  // keep model/magval in sessionStorage so they are cleared when the tab/window closes
   useEffect(() => {
-    if (model) localStorage.setItem(LS_KEYS.model, model);
-    else localStorage.removeItem(LS_KEYS.model);
+    if (model) sessionStorage.setItem(LS_KEYS.model, model);
+    else sessionStorage.removeItem(LS_KEYS.model);
   }, [model]);
 
   useEffect(() => {
-    if (magval !== "") localStorage.setItem(LS_KEYS.magval, magval);
-    else localStorage.removeItem(LS_KEYS.magval);
+    if (magval !== "") sessionStorage.setItem(LS_KEYS.magval, magval);
+    else sessionStorage.removeItem(LS_KEYS.magval);
   }, [magval]);
 
   const resetAll = () => {
@@ -259,11 +261,11 @@ const Demo = () => {
     setStepStatus({ 1: null, 2: null, 3: null });
     setViewMode("summary");
     setStep(1);
-    // clear persisted state
-    localStorage.removeItem(LS_KEYS.fileMeta);
-    localStorage.removeItem(LS_KEYS.fileDataURL);
-    localStorage.removeItem(LS_KEYS.model);
-    localStorage.removeItem(LS_KEYS.magval);
+    // clear persisted state: everything in sessionStorage now
+    sessionStorage.removeItem(LS_KEYS.fileMeta);
+    sessionStorage.removeItem(LS_KEYS.fileDataURL);
+    sessionStorage.removeItem(LS_KEYS.model);
+    sessionStorage.removeItem(LS_KEYS.magval);
   };
 
   // Image modal controls
@@ -611,7 +613,7 @@ const Demo = () => {
                     <strong>{xaiMethod}</strong>
                   </div>
                 </div>
-              )} */}
+              } */}
 
               <div className="form-group">
                 <label htmlFor="mag-input">Magnification Value</label>
