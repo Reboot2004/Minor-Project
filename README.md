@@ -140,9 +140,6 @@ Contributing
 - Run linting: npm run lint
 - Keep UI changes responsive and accessible.
 
-License
-- Add your chosen license here (e.g., MIT). This repository currently contains no explicit license file.
-
 Contact / Authors
 - K N S Sri Harshith — https://github.com/Reboot2004
 - MahaReddy Jeevan Reddy — https://github.com/jeevanreddym9
