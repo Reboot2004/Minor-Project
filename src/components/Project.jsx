@@ -119,12 +119,12 @@ const Project = () => {
 
         <div className="perf-grid">
           {[
-            { label: "Accuracy", value: "85.9%" },
-            { label: "Precision", value: "86%" },
-            { label: "Recall", value: "85.9%" },
-            { label: "F1-Score", value: "85.7%" },
-            { label: "Dice Coefficient Score", value: "69.6%" },
-            { label: "Intersection over Union", value: "53.4%" },
+            { label: "Accuracy", value: "92%" },
+            { label: "Precision", value: "84%" },
+            { label: "Recall", value: "83%" },
+            { label: "F1-Score", value: "84%" },
+            { label: "Dice Coefficient Score", value: "80.7%" },
+            { label: "Intersection over Union", value: "68.2%" },
           ].map((metric, index) => (
             <div key={index} className="perf-item">
               <span className="perf-pill">
